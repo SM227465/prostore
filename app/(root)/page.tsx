@@ -1,11 +1,12 @@
-import Image from "next/image";
-import sampleData from "@/db/sample-data";
-import ProductList from "@/components/shared/product/product-list";
+import ProductList from '@/components/shared/product/product-list';
+import { getLatestProduct } from '@/lib/actions/product.action';
 
-export default function Home() {
+const Home = async () => {
+  const latestProduct = await getLatestProduct();
   return (
     <>
-    <ProductList data={sampleData.products} title="Newest Arrivals" limit={4}/>
+      <ProductList data={latestProduct} title='Newest Arrivals' limit={4} />
     </>
   );
-}
+};
+export default Home;
