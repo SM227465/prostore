@@ -7,8 +7,8 @@ const Home = async () => {
   const modifiedLatestProduct = latestProduct.map((product) => {
     return {
       ...product,
-      price: product.price.toNumber(),
-      rating: product.price.toNumber(),
+      price: Number(product.price),
+      rating: Number(product.price),
     };
   });
 
