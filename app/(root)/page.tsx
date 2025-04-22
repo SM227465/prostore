@@ -8,7 +8,7 @@ const Home = async () => {
     return {
       ...product,
       price: String(product.price),
-      rating: String(product.price),
+      rating: String(product.numberOfReviews),
     };
   });
 
