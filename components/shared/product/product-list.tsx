@@ -1,8 +1,8 @@
-import { IProduct } from '@/interfaces/product.interface';
+import { Product } from '@/types';
 import ProductCard from './product-card';
 
 interface Props {
-  data: IProduct[];
+  data: Product[];
   limit?: number;
   title?: string;
 }
