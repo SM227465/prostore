@@ -30,7 +30,7 @@ export const config: NextAuthConfig = {
         }
 
         const user = await prisma.user.findFirst({
-          where: { email: credentials.email as string, password: credentials.password as string },
+          where: { email: credentials.email as string },
         });
 
         if (!user || !user.password) {
@@ -56,12 +56,27 @@ export const config: NextAuthConfig = {
   callbacks: {
     async session({ session, token, user, trigger }: any) {
       session.user.id = token.sub;
+      session.user.role = token.role;
+      session.user.name = token.name;
 
       if (trigger === 'update') {
         session.user.name = user.name;
       }
 
       return session;
+    },
+
+    async jwt({ token, user, trigger, session }: any) {
+      if (user) {
+        token.role = user.role;
+
+        if (user.name === 'NO_NAME') {
+          token.name = user.email!.split('@')?.[0];
+          await prisma.user.update({ where: { id: user.id }, data: { name: token.name } });
+        }
+      }
+
+      return token;
     },
   },
 };
