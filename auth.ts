@@ -1,17 +1,18 @@
-import NextAuth, { type NextAuthConfig } from 'next-auth';
 import { PrismaAdapter } from '@auth/prisma-adapter';
-import { prisma } from './db/prisma';
-import Credentials from 'next-auth/providers/credentials';
 import { compareSync } from 'bcrypt-ts-edge';
+import NextAuth from 'next-auth';
+import Credentials from 'next-auth/providers/credentials';
+import { authConfig } from './auth.config';
+import { prisma } from './db/prisma';
 
-export const config: NextAuthConfig = {
+export const config = {
   pages: {
     signIn: '/sign-in',
     error: '/sign-in',
   },
 
   session: {
-    strategy: 'jwt',
+    strategy: 'jwt' as const,
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
 
@@ -54,6 +55,7 @@ export const config: NextAuthConfig = {
   ],
 
   callbacks: {
+    ...authConfig.callbacks,
     async session({ session, token, user, trigger }: any) {
       session.user.id = token.sub;
       session.user.role = token.role;
