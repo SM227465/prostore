@@ -1,17 +1,19 @@
-import NextAuth, { type NextAuthConfig } from 'next-auth';
 import { PrismaAdapter } from '@auth/prisma-adapter';
-import { prisma } from './db/prisma';
-import Credentials from 'next-auth/providers/credentials';
 import { compareSync } from 'bcrypt-ts-edge';
+import NextAuth from 'next-auth';
+import Credentials from 'next-auth/providers/credentials';
+import { authConfig } from './auth.config';
+import { prisma } from './db/prisma';
+import { NextResponse } from 'next/server';
 
-export const config: NextAuthConfig = {
+export const config = {
   pages: {
     signIn: '/sign-in',
     error: '/sign-in',
   },
 
   session: {
-    strategy: 'jwt',
+    strategy: 'jwt' as const,
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
 
@@ -54,6 +56,7 @@ export const config: NextAuthConfig = {
   ],
 
   callbacks: {
+    ...authConfig.callbacks,
     async session({ session, token, user, trigger }: any) {
       session.user.id = token.sub;
       session.user.role = token.role;
@@ -77,6 +80,18 @@ export const config: NextAuthConfig = {
       }
 
       return token;
+    },
+
+    authorized({ request, auth }: any) {
+      if (!request.cookies.get('sessionCartId')) {
+        const sessionCartId = crypto.randomUUID();
+        const newRequestHeaders = new Headers(request.headers);
+        const response = NextResponse.next({ request: { headers: newRequestHeaders } });
+        response.cookies.set('sessionCartId', sessionCartId);
+        return response;
+      } else {
+        return true;
+      }
     },
   },
 };
