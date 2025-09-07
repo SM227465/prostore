@@ -4,6 +4,7 @@ import NextAuth from 'next-auth';
 import Credentials from 'next-auth/providers/credentials';
 import { authConfig } from './auth.config';
 import { prisma } from './db/prisma';
+import { NextResponse } from 'next/server';
 
 export const config = {
   pages: {
@@ -79,6 +80,18 @@ export const config = {
       }
 
       return token;
+    },
+
+    authorized({ request, auth }: any) {
+      if (!request.cookies.get('sessionCartId')) {
+        const sessionCartId = crypto.randomUUID();
+        const newRequestHeaders = new Headers(request.headers);
+        const response = NextResponse.next({ request: { headers: newRequestHeaders } });
+        response.cookies.set('sessionCartId', sessionCartId);
+        return response;
+      } else {
+        return true;
+      }
     },
   },
 };
